@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 48 Laws of Power — Interactive Summary</title>
+<style>
+  :root{
+    --bg:#0e0d0b; --panel:#1a1814; --panel2:#221f19; --gold:#d4af37; --gold-dim:#9c8430;
+    --text:#e8e2d5; --muted:#a09880; --red:#c0564a; --green:#6faa64; --blue:#6b9bc3;
+    --border:#353025; --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;line-height:1.55;padding-bottom:80px}
+  .sans{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+
+  header{padding:48px 20px 24px;text-align:center;background:radial-gradient(ellipse at top,#2a2317 0%,var(--bg) 70%);border-bottom:1px solid var(--border)}
+  header h1{font-size:clamp(1.8rem,5vw,3rem);letter-spacing:.04em;color:var(--gold)}
+  header h1 .num{font-size:1.2em}
+  header p.sub{color:var(--muted);margin-top:8px;font-style:italic}
+  .counter{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:6px 16px;border:1px solid var(--border);border-radius:999px;background:var(--panel);color:var(--muted);font-size:.85rem}
+  .counter b{color:var(--gold);font-variant-numeric:tabular-nums}
+  .disclaimer{max-width:760px;margin:16px auto 0;font-size:.78rem;color:#6e6753;padding:0 16px}
+
+  nav.tabs{position:sticky;top:0;z-index:50;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px 10px;background:rgba(14,13,11,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
+  nav.tabs button{cursor:pointer;border:1px solid var(--border);background:var(--panel);color:var(--text);padding:8px 16px;border-radius:999px;font-size:.9rem;transition:.2s}
+  nav.tabs button:hover{border-color:var(--gold-dim)}
+  nav.tabs button.active{background:var(--gold);color:#17140d;border-color:var(--gold);font-weight:700}
+
+  main{max-width:1100px;margin:0 auto;padding:24px 16px}
+  section.view{display:none}
+  section.view.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  .toolbar input{flex:1;min-width:200px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text);font-size:.95rem}
+  .toolbar input:focus{outline:1px solid var(--gold-dim)}
+  .pill{cursor:pointer;border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:6px 12px;border-radius:999px;font-size:.8rem}
+  .pill.active{background:var(--panel2);color:var(--gold);border-color:var(--gold-dim)}
+  .viewtoggle{margin-left:auto}
+  .stat{color:var(--muted);font-size:.8rem;margin-bottom:12px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.2s;position:relative}
+  .card:hover{border-color:var(--gold-dim);transform:translateY(-2px)}
+  .card .top{display:flex;align-items:baseline;gap:10px}
+  .card .lnum{font-size:1.5rem;color:var(--gold);font-weight:700;min-width:2ch}
+  .card h3{font-size:1rem;line-height:1.3}
+  .card .cat{position:absolute;top:12px;right:12px;font-size:.68rem;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+  .card .essence{margin-top:10px;color:var(--muted);font-size:.9rem}
+  .card .more{display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;font-size:.88rem}
+  .card.open .more{display:block}
+  .more .row{margin-bottom:10px}
+  .more .lbl{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:2px}
+  .lbl.inv{color:var(--green)} .lbl.rev{color:var(--red)}
+  .card .hint{margin-top:10px;font-size:.7rem;color:#5d5745}
+  .card.read{border-color:#3d5a37}
+  .readbtn{margin-top:10px;font-size:.72rem;background:none;border:1px solid var(--border);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
+  .card.read .readbtn{border-color:var(--green);color:var(--green)}
+
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+  th{color:var(--gold);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;position:sticky;top:0;background:var(--panel2);z-index:2;box-shadow:0 1px 0 var(--border)}
+  tr:hover td{background:var(--panel)}
+  td.n{color:var(--gold);font-weight:700}
+  .tablewrap{display:none;overflow:auto;max-height:75vh;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg)}
+
+  .roulette{text-align:center;margin:26px 0}
+  .roulette button{cursor:pointer;background:linear-gradient(135deg,var(--gold),#b8912a);color:#17140d;border:none;padding:12px 26px;border-radius:999px;font-weight:700;font-size:1rem}
+  .roulette button:active{transform:scale(.96)}
+  #rouletteOut{max-width:640px;margin:18px auto 0}
+
+  .theme{background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+  .theme h3{color:var(--gold);margin-bottom:6px}
+  .theme .laws{font-size:.75rem;color:var(--muted);margin-top:8px}
+
+  .inv-card{background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+  .inv-card h3{color:var(--green);margin-bottom:6px;font-size:1rem}
+  .inv-card .laws{font-size:.75rem;color:var(--muted);margin-top:8px}
+
+  .action{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer}
+  .action input{margin-top:5px;accent-color:var(--gold);width:16px;height:16px}
+  .action.done .txt{opacity:.45;text-decoration:line-through}
+  .action .txt b{display:block}
+  .action .txt span{font-size:.85rem;color:var(--muted)}
+  #actionProgress{height:8px;background:var(--panel2);border-radius:99px;margin:0 0 18px;overflow:hidden}
+  #actionProgress div{height:100%;width:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .3s}
+
+  .warn{background:#241a16;border:1px solid #4a3020;border-radius:var(--radius);padding:16px 18px;margin:0 0 20px;font-size:.88rem;color:#cdb9a0}
+  .warn b{color:#e0a36a}
+  h2.sec{color:var(--gold);margin:6px 0 16px;font-size:1.4rem}
+  footer{text-align:center;color:#5d5745;font-size:.75rem;margin-top:40px;padding:0 16px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>THE <span class="num">48</span> LAWS OF POWER</h1>
+  <p class="sub">by Robert Greene — an interactive study summary</p>
+  <div class="counter sans" title="Page views">👁 <b id="views">…</b> views &nbsp;·&nbsp; <span id="readCount">0</span>/48 laws studied</div>
+  <p class="disclaimer sans">Independent study notes, paraphrased. The book is descriptive and deliberately amoral — treat the laws as a lens for recognizing power dynamics (and protecting yourself), not a license to manipulate.</p>
+</header>
+
+<nav class="tabs sans">
+  <button class="active" data-view="laws">⚖️ The 48 Laws</button>
+  <button data-view="themes">🗝️ Key Takeaways</button>
+  <button data-view="investor">📈 Investor Lessons</button>
+  <button data-view="roles">🧭 Life Playbooks</button>
+  <button data-view="actions">✅ Action Steps</button>
+</nav>
+
+<main>
+
+<!-- ==================== LAWS ==================== -->
+<section id="view-laws" class="view active">
+  <div class="roulette sans">
+    <button id="spin">🎲 Law Roulette — show me a random law</button>
+    <div id="rouletteOut"></div>
+  </div>
+  <div class="toolbar sans">
+    <input id="search" type="search" placeholder="Search laws… (e.g. 'reputation', 'timing', 'enemy')">
+    <button class="pill cat-pill active" data-cat="all">All</button>
+    <button class="pill cat-pill" data-cat="Strategy">🎯 Strategy</button>
+    <button class="pill cat-pill" data-cat="Perception">🎭 Perception</button>
+    <button class="pill cat-pill" data-cat="Social">🤝 Social</button>
+    <button class="pill cat-pill" data-cat="Defense">🛡️ Defense</button>
+    <button class="pill cat-pill" data-cat="Offense">⚔️ Offense</button>
+    <button class="pill viewtoggle" id="toggleView">📋 Table view</button>
+  </div>
+  <div class="toolbar sans" style="margin-top:-8px">
+    <span style="color:var(--muted);font-size:.8rem">Lens:</span>
+    <button class="pill role-pill active" data-role="inv">📈 Investor</button>
+    <button class="pill role-pill" data-role="emp">💼 Employee</button>
+    <button class="pill role-pill" data-role="cow">👥 Coworker</button>
+    <button class="pill role-pill" data-role="fam">🏠 Family</button>
+    <button class="pill role-pill" data-role="com">🌍 Community</button>
+    <button class="pill role-pill" data-role="neg">🤝 Negotiator</button>
+  </div>
+  <div class="stat sans" id="stat"></div>
+  <div class="grid" id="grid"></div>
+  <div class="tablewrap" id="tablewrap">
+    <table class="sans">
+      <thead><tr><th>#</th><th>Law</th><th>Essence</th><th id="angleTh">📈 Investor angle</th><th>Caution / Reversal</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================== THEMES ==================== -->
+<section id="view-themes" class="view">
+  <h2 class="sec">Key Takeaways — the 7 master themes</h2>
+  <p style="color:var(--muted);margin-bottom:18px">All 48 laws reduce to a handful of recurring principles:</p>
+  <div id="themes"></div>
+</section>
+
+<!-- ==================== INVESTOR ==================== -->
+<section id="view-investor" class="view">
+  <h2 class="sec">Lessons for the Investor</h2>
+  <div class="warn sans"><b>Read this first:</b> Greene wrote about courts and conquest, not markets. The translation that works for investors is almost always <i>defensive</i>: master your own psychology, guard your reputation, and recognize when these tactics are being used <i>on you</i> — by promoters, management teams, and the market narrative machine.</div>
+  <div id="investor"></div>
+</section>
+
+<!-- ==================== LIFE PLAYBOOKS ==================== -->
+<section id="view-roles" class="view">
+  <h2 class="sec">Life Playbooks — the laws, role by role</h2>
+  <div class="warn sans"><b>Ethics note:</b> with family, friends and community, these laws work best inverted — as <i>awareness</i> (spotting guilt-trips, triangulation and manipulation used on you) and as <i>harmony tools</i> (timing, tact, emotional deposits). Influence built on warmth and reliability outlasts influence built on tactics. In business negotiation, more of the playbook applies as written.</div>
+  <div id="rolebooks"></div>
+</section>
+
+<!-- ==================== ACTIONS ==================== -->
+<section id="view-actions" class="view">
+  <h2 class="sec">Action Steps & Recommendations</h2>
+  <p style="color:var(--muted);margin-bottom:14px">A practical checklist. Tick items off — progress is saved in your browser.</p>
+  <div id="actionProgress"><div></div></div>
+  <div id="actions"></div>
+</section>
+
+</main>
+
+<footer class="sans">
+  Study summary of <i>The 48 Laws of Power</i> (Robert Greene, 1998). Paraphrased notes for personal education — buy the book for the full historical stories and transgressions/observances of each law.
+</footer>
+
+<script>
+/* ============ DATA: all 48 laws (paraphrased) ============ */
+const LAWS=[
+{n:1,t:"Never Outshine the Master",c:"Social",e:"Make those above you feel comfortably superior. Displaying your talents too brazenly triggers insecurity in superiors — and insecure superiors retaliate.",i:"Manage up with bosses, LPs and clients. Share credit upward; let sponsors feel the wins are theirs.",r:"If your 'master' is clearly sinking, quiet excellence beside a failing leader can sink you too — know when to step out of the shadow."},
+{n:2,t:"Never Put Too Much Trust in Friends; Use Enemies",c:"Social",e:"Friends betray more readily because envy and entitlement creep in; a reconciled enemy has more to prove and is often more loyal.",i:"Never invest on friendship or skip diligence because you like someone. Evaluate every deal as if a stranger brought it.",r:"Don't become paranoid; you still need allies — just keep professional standards with everyone."},
+{n:3,t:"Conceal Your Intentions",c:"Perception",e:"Keep people off-balance by never revealing the purpose behind your actions; they cannot defend against what they cannot see.",i:"Don't telegraph your positions or pending moves. Large players conceal accumulation for a reason; loose talk costs money.",r:"Habitual secrecy breeds distrust with people whose long-term trust you need."},
+{n:4,t:"Always Say Less Than Necessary",c:"Perception",e:"The more you say, the more common you appear and the more likely you say something foolish. Power impresses through restraint.",i:"Avoid public predictions that box you in. The investor who talks least has the least ego invested in being 'right'.",r:"Silence can arouse suspicion; sometimes measured openness disarms better."},
+{n:5,t:"So Much Depends on Reputation — Guard It with Your Life",c:"Defense",e:"Reputation is the cornerstone of power; through it alone you can intimidate and win. One breach can undo decades.",i:"Your track record and integrity are compounding assets. One blow-up, one shady trade, and counterparties vanish. Protect it above returns.",r:"Don't be so protective that you can never take bold, criticism-inviting positions."},
+{n:6,t:"Court Attention at All Cost",c:"Offense",e:"Everything is judged by appearance; what is unseen counts for nothing. Stand out — better to be attacked than ignored.",i:"Visibility attracts deal flow and capital — but beware: the best trades are usually in the unloved, un-courted corners of the market.",r:"Attention invites scrutiny and envy; for a contrarian investor, obscurity is often the edge."},
+{n:7,t:"Get Others to Do the Work, but Take the Credit",c:"Offense",e:"Use the wisdom, knowledge and legwork of others to advance your cause — never do yourself what others can do for you.",i:"Stand on shoulders: study great investors' letters, use analysts and screens. But in investing, outsourced conviction fails at the first drawdown — the thinking must become yours.",r:"Stealing credit from those below you creates enemies who wait for your stumble."},
+{n:8,t:"Make Other People Come to You — Use Bait if Necessary",c:"Strategy",e:"When you force others to act, you are in control. Lure opponents from their fortress on your terms.",i:"Be the patient buyer with cash when sellers are desperate. Panics bring the market to you at your price — if you waited.",r:"Sometimes striking first and fast is the only option; passivity isn't always power."},
+{n:9,t:"Win Through Your Actions, Never Through Argument",c:"Social",e:"Any momentary triumph in argument breeds resentment. Demonstrate; don't explain.",i:"Don't argue with the market or evangelize your thesis online. Let the position and the results speak.",r:"Pick the rare moments when speaking up genuinely changes the outcome."},
+{n:10,t:"Infection: Avoid the Unhappy and Unlucky",c:"Defense",e:"Emotional states are as infectious as disease. The chronically miserable drown you with them; associate with the fortunate instead.",i:"Audit your information diet. Permabears, doom feeds and panicked group chats infect your judgment exactly when calm is worth the most.",r:"Distinguish toxic chronic negativity from a friend in genuine temporary need — and from a useful bearish argument."},
+{n:11,t:"Learn to Keep People Dependent on You",c:"Strategy",e:"To maintain independence you must be needed. The more you are relied on, the more freedom you have.",i:"Own what's irreplaceable: businesses with moats, switching costs and pricing power — companies their customers cannot leave.",r:"Dependence built on fear eventually turns on you; better to be needed and liked."},
+{n:12,t:"Use Selective Honesty and Generosity to Disarm Your Victim",c:"Perception",e:"One sincere, honest gesture covers dozens of dishonest ones and opens the door of trust.",i:"Defense mode: promoters disarm with small truths and free gifts before the big ask. A little honesty is the cheapest con there is.",r:"Where you have a reputation for deception, no honest gesture will land."},
+{n:13,t:"When Asking for Help, Appeal to Self-Interest, Never Mercy or Gratitude",c:"Social",e:"People act for their own benefit. Show them what's in it for them and they'll move; appeal to gratitude and they'll stall.",i:"Structure every deal and pitch around the other side's win. In negotiations, their incentive — not your need — closes the gap.",r:"With people bound to you by genuine loyalty, naked incentive-talk can insult."},
+{n:14,t:"Pose as a Friend, Work as a Spy",c:"Offense",e:"Learn to probe; ask indirect questions in friendly settings and people reveal their intentions and weaknesses.",i:"The ethical version is Philip Fisher's 'scuttlebutt': talk to customers, suppliers, ex-employees. The best research is conversational, not in the filing.",r:"If caught spying, the information gained never repays the trust lost."},
+{n:15,t:"Crush Your Enemy Totally",c:"Offense",e:"A half-defeated enemy recovers and seeks revenge. If you must act against someone, leave no route back.",i:"Translate to problems, not people: when a thesis breaks, exit fully — don't keep a 'little bit' of a broken position that keeps wounding you.",r:"Mercy can convert an enemy; and total war invites total war in return. In markets, scorched-earth tactics attract regulators."},
+{n:16,t:"Use Absence to Increase Respect and Honor",c:"Perception",e:"Too much circulation makes the price go down. Scarcity of presence creates value; withdraw at the right moment.",r:"Absence only works once presence is established; disappear too early and you're simply forgotten.",i:"Scarcity drives price — in assets and in you. Don't overtrade, don't over-publish, don't be available for every deal."},
+{n:17,t:"Keep Others in Suspended Terror: Cultivate an Air of Unpredictability",c:"Offense",e:"Humans crave patterns. Deliberate unpredictability keeps opponents off-balance and over-explaining.",i:"If your behavior in markets is perfectly predictable, it will be exploited. Vary tactics; never let counterparties read your book.",r:"Unpredictability from a position of weakness just looks erratic; and those above you may find it threatening."},
+{n:18,t:"Do Not Build Fortresses to Protect Yourself — Isolation Is Dangerous",c:"Defense",e:"Fortresses cut you off from information and allies, making you an easier target. Circulate; protection comes from the crowd.",i:"Echo chambers kill portfolios. Seek disconfirming views, diverse networks, people who will tell you you're wrong.",r:"Brief, chosen solitude for deep thinking is different from defensive isolation."},
+{n:19,t:"Know Who You're Dealing With — Do Not Offend the Wrong Person",c:"Defense",e:"People differ. The quietly proud, the insecure, the long-memoried avenger — misjudge your target and you pay for years.",i:"Know your counterparties: who's on the other side of the trade, who controls the company, which regulators and activists you're provoking.",r:"None — Greene marks this law as having no useful reversal: never offend the wrong person."},
+{n:20,t:"Do Not Commit to Anyone",c:"Strategy",e:"The fool rushes to take sides. Commit to no one but yourself and others will court you; you gain power by being desired, not possessed.",i:"Stay flexible: don't marry a thesis, a sector, a guru or a tribe. Strong opinions, loosely held — your loyalty is to the evidence.",r:"Perpetual neutrality eventually angers both sides; sometimes you must choose."},
+{n:21,t:"Play a Sucker to Catch a Sucker — Seem Dumber Than Your Mark",c:"Perception",e:"Make your targets feel smarter than you and they'll never suspect your real motives.",i:"Beware anyone who makes you feel like the smartest person in the deal — that feeling is the product being sold. If you can't spot the sucker at the table…",r:"Playing dumb near the top can read as incompetence; calibrate the act."},
+{n:22,t:"Use the Surrender Tactic: Transform Weakness into Power",c:"Defense",e:"When weaker, never fight for honor's sake — surrender, buy time, and wait for power to shift.",i:"Capitulate fast when you're wrong. Taking a small loss early is strategic surrender; fighting the market for pride is how accounts die.",r:"Surrender can become a habit; it is a tactic for recovery, not an identity."},
+{n:23,t:"Concentrate Your Forces",c:"Strategy",e:"Intensity beats extensity. Conserve your energies and focus them at the decisive point rather than scattering them.",i:"Concentrate capital in your best-understood ideas rather than 'diworsifying' into your 40th-favorite stock. Depth of research is the edge.",r:"Concentration raises stakes: one wrong big bet can be fatal. Size positions so no single error ends the game."},
+{n:24,t:"Play the Perfect Courtier",c:"Social",e:"Thrive in hierarchies through indirection, graceful flattery, and making those above you look good without appearing to try.",i:"Careers in finance are court politics: diplomacy with boards, partners and committees often decides more than analysis does.",r:"Courtiership without substance is eventually exposed; be excellent first, graceful second."},
+{n:25,t:"Re-Create Yourself",c:"Perception",e:"Don't accept the role society hands you. Forge your identity, command attention, and be the master of your own image.",i:"Reinvent your process when regimes change — what worked in one decade fails in the next. After a blow-up, rebuild deliberately rather than hiding.",r:"Constant reinvention without a core reads as having no identity at all."},
+{n:26,t:"Keep Your Hands Clean",c:"Offense",e:"Maintain a spotless appearance; use others as cat's-paws and scapegoats to distance yourself from mistakes and dirty work.",i:"Defense mode: notice when YOU are the cat's-paw — the retail buyer handed the bag, the 'independent' analyst fronting a promotion, the fall-guy in a deal.",r:"Scapegoating discovered is reputation suicide. Owning errors openly is often the greater power move."},
+{n:27,t:"Play on People's Need to Believe to Create a Cultlike Following",c:"Perception",e:"People crave belief. Offer vague promises, enthusiasm over clarity, and ritual — and followers assemble themselves.",i:"This is the anatomy of every bubble and cult stock: vague TAM stories, charismatic founders, hostility to doubters. Recognize the playbook and don't join the congregation.",r:"Cults of personality collapse violently; and leading one makes you the target when it does."},
+{n:28,t:"Enter Action with Boldness",c:"Offense",e:"Timidity is dangerous; hesitation infects the audience. Errors of audacity are forgiven more easily than errors of timidity.",i:"When you've done the work and the odds are clearly in your favor, bet meaningfully. Great records are made by a few bold, well-researched strokes.",r:"Boldness must follow calculation, never replace it — bold and wrong at size is ruin."},
+{n:29,t:"Plan All the Way to the End",c:"Strategy",e:"The ending is everything. Account for consequences, obstacles and twists before you begin, and you won't be surprised by circumstance.",i:"Define the exit before the entry: price targets, thesis-break triggers, position limits. Run a premortem — 'it's 2 years later and this failed; why?'",r:"Plans must bend to events; planning the end is not the same as rigidity."},
+{n:30,t:"Make Your Accomplishments Seem Effortless",c:"Perception",e:"Conceal the sweat and the tricks. Effortlessness (sprezzatura) makes your power seem natural and unmatchable.",i:"Never reveal your full process or edge publicly — once the trick is taught, the trick is arbitraged.",r:"Hiding all effort can leave your work undervalued by those who pay for it."},
+{n:31,t:"Control the Options: Get Others to Play with the Cards You Deal",c:"Strategy",e:"The best deceptions give the other person a choice — where every option serves you. They feel free while you set the menu.",i:"Whoever structures the deal wins. Read the term sheet's menu of 'choices'. In negotiation, be the one who frames the options.",r:"If the framing is noticed, trust evaporates; sophisticated counterparties re-deal the cards."},
+{n:32,t:"Play to People's Fantasies",c:"Perception",e:"Truth is often unpleasant and mundane; fantasy sells. Those who conjure romance and riches for the frustrated gain enormous power.",i:"Bubbles are fantasies with a ticker. Buy cash flows, not dreams — and when you hear a story too beautiful to check, check twice.",r:"Fantasy eventually meets reality; the conjurer is nearby when it does."},
+{n:33,t:"Discover Each Man's Thumbscrew",c:"Offense",e:"Everyone has a weakness — insecurity, vanity, secret pleasure, fear. Find the lever and you can turn it.",i:"Your thumbscrews are fear, greed and FOMO — and the market's sharpest operators know exactly how to press them. Know yours before they do.",r:"Pressing weaknesses creates desperate enemies; a thumbscrew overused breaks."},
+{n:34,t:"Be Royal in Your Own Fashion: Act Like a King to Be Treated Like One",c:"Perception",e:"How you carry yourself sets your price. Ask for less and you get less; demand with calm confidence and crowns follow.",i:"Set your terms in negotiations and fee discussions without apology. Confidence anchored in competence changes what you're offered.",r:"Royal bearing without substance is pomposity — the first setback exposes it."},
+{n:35,t:"Master the Art of Timing",c:"Strategy",e:"Never seem in a hurry. Sniff out the spirit of the times, and strike only when the moment is ripe.",i:"Patience is the investor's rarest edge. Don't force trades in a dead tape; recognize regime shifts early; let compounding do the slow work.",r:"Waiting for the 'perfect' moment forever is its own failure — ripeness, not perfection."},
+{n:36,t:"Disdain Things You Cannot Have: Ignoring Them Is the Best Revenge",c:"Defense",e:"Acknowledging petty problems gives them life. What you cannot have, scorn — the less interest shown, the more superior you seem.",i:"The trade you missed is gone; chasing it at higher prices to soothe FOMO is how good investors become bad ones. Next pitch.",r:"Some threats genuinely compound if ignored — disdain is for the trivial, not the real."},
+{n:37,t:"Create Compelling Spectacles",c:"Perception",e:"Striking imagery and grand symbolism create an aura of power that words can't; people believe what they see staged.",i:"Flashy HQs, celebrity boards, glossy decks and launch theatrics are spectacle — audit the numbers behind the show (the show is often the product).",r:"Spectacle without delivery becomes the most visible failure possible."},
+{n:38,t:"Think as You Like but Behave Like Others",c:"Defense",e:"Flaunting unconventional ideas makes people feel inferior and punished for it. Blend outwardly; share originality only with tolerant friends.",i:"Be contrarian in your positions, not in needless public crusades. Quietly hold the variant view; let the P&L be your manifesto.",r:"Total conformity erases the independent judgment that makes you valuable."},
+{n:39,t:"Stir Up Waters to Catch Fish",c:"Offense",e:"Anger and emotion are strategically counterproductive — make enemies emotional while you stay calm, and you hold the advantage.",i:"Volatility is a machine that transfers money from the emotional to the calm. Never trade angry, scared, or to 'get it back'.",r:"Stirred waters can swamp your own boat; chaos is hard to aim."},
+{n:40,t:"Despise the Free Lunch",c:"Defense",e:"What is offered for free carries a hidden obligation or trick. Pay full price for excellence — in money there is rarely a bargain without a hook.",i:"There is no free lunch: 'guaranteed' returns, free tips, zero-fee schemes — someone is paying, and if you can't see who, it's you.",r:"Generosity given freely does exist — among genuine allies; just audit the motive."},
+{n:41,t:"Avoid Stepping into a Great Man's Shoes",c:"Strategy",e:"Following a great predecessor traps you in their shadow. Establish your own name and direction; outshine by differing.",i:"Don't blindly clone famous investors — their size, era and information differ from yours. Learn the principles, build your own process.",r:"Where a predecessor's playbook still perfectly fits the terrain, use it before departing from it."},
+{n:42,t:"Strike the Shepherd and the Sheep Will Scatter",c:"Offense",e:"Trouble usually traces to a single strong individual. Neutralize or remove the instigator and the following disperses.",i:"Key-person risk cuts both ways: a great founder is the thesis, and a rotten CEO is the sell signal. Underwrite the shepherd, not just the sheep.",r:"Striking a beloved leader can create a martyr and unify the flock against you."},
+{n:43,t:"Work on the Hearts and Minds of Others",c:"Social",e:"Coercion backfires; seduction wins. Appeal to emotions and self-interest and people move willingly — ignore them and they resent you.",i:"Markets run on emotion before logic. In your firm and your deals, win people — committees, partners, sellers — not arguments.",r:"Soft power takes time; in emergencies, authority must sometimes simply command."},
+{n:44,t:"Disarm and Infuriate with the Mirror Effect",c:"Offense",e:"Mirror your opponents — their actions, words, values — and they cannot read you; mirrored mockery unsettles, mirrored empathy seduces.",i:"Understand reflexivity: markets mirror participants' expectations back at them, amplifying trends both ways (Soros). Price can create its own fundamentals — for a while.",r:"Mirrors show nothing of yourself; relationships need more than reflection."},
+{n:45,t:"Preach the Need for Change, but Never Reform Too Much at Once",c:"Strategy",e:"People are creatures of habit. Champion change in words, but move gradually and dress the new in the clothes of the familiar.",i:"Evolve your strategy gradually — whipsawing your whole portfolio or process after every drawdown guarantees you're always optimized for the last war.",r:"When the house is on fire, incremental reform is negligence."},
+{n:46,t:"Never Appear Too Perfect",c:"Defense",e:"Appearing flawless breeds silent envy, and envy breeds quiet enemies. Admit harmless flaws; stay human.",i:"Publish your mistakes and lessons. Investors who admit errors keep credibility, allies and self-honesty; 'never wrong' managers hide rot.",r:"Confessing serious weakness to rivals arms them — keep the flaws you admit genuinely harmless."},
+{n:47,t:"Do Not Go Past the Mark You Aimed For; In Victory, Learn When to Stop",c:"Strategy",e:"The moment of victory is the moment of greatest danger — momentum and hubris carry you past your goal into new enemies and overreach.",i:"Take profits according to plan. The winning streak is when leverage creeps up and discipline creeps out — strategy, not greed, picks the stopping point.",r:"Stopping short of consolidating a win can let the gain evaporate; secure it, then stop."},
+{n:48,t:"Assume Formlessness",c:"Strategy",e:"Anything with a fixed shape can be attacked. Stay fluid, adaptable, like water — never bet on stability, never give enemies something solid to strike.",i:"The market's only constant is regime change. Hold your methods loosely, your principles firmly — the dogmatic get carried out; the adaptable compound.",r:"Formlessness is for strategy, not values — a core of discipline must stay solid."}
+];
+
+/* ============ ROLE ANGLES: emp=Employee, cow=Coworker, fam=Family, com=Community, neg=Negotiation ============ */
+const ANGLES={
+1:{emp:"Make your boss look good; present wins as their mentorship paying off. Promotions flow through secure superiors.",cow:"Don't publicly correct senior peers; share the spotlight so allies outnumber rivals.",fam:"Let elders (parents, in-laws) feel wise — ask their advice even when you don't need it; influence follows respect shown.",com:"Let long-time community leaders keep ceremonial credit while you quietly build real contribution.",neg:"Let their lead negotiator look smart to their own bosses; deals die when someone loses face."},
+2:{emp:"Don't over-share confidential career matters with work 'friends'; a rival turned ally is often more invested in you.",cow:"Workplace friendships shift with incentives — keep professional boundaries around sensitive information.",fam:"Never mix serious money with relatives on trust alone; family loans and ventures sour fastest. Formalize everything.",com:"The critic you win over becomes your loudest advocate in any community group.",neg:"Friendly history is no substitute for a contract; paper every deal, especially with friends."},
+3:{emp:"Don't broadcast job hunts or promotion ambitions early; move quietly, announce when done.",cow:"Keep career plans vague around competitive peers; shared plans become used plans.",fam:"Don't float big decisions (a move, a purchase) to the whole family before they're final — you'll invite a lobbying campaign.",com:"Build support one-on-one before proposing the big change at the association meeting.",neg:"Never reveal your reservation price, deadline pressure, or how much you want the deal."},
+4:{emp:"In reviews and meetings, measured words read as senior; over-explaining reads as junior.",cow:"Vent less at the office — today's confidant is tomorrow's leak.",fam:"In family disputes the one who speaks least and last usually steers the outcome; silence defuses in-law provocations.",com:"Listen twice as much as you speak at meetings; scarce words carry more weight.",neg:"After naming your number, stop talking. The first one to fill the silence concedes."},
+5:{emp:"Your internal brand — reliable, no-drama, delivers — decides opportunities before you enter the room.",cow:"Never badmouth colleagues; it defines you more than them, and it always travels.",fam:"Be the relative known for keeping their word; family reputation compounds for decades and decides who's trusted in a crisis.",com:"In a community, reputation is the only currency — one broken commitment travels the whole network.",neg:"A reputation for fair dealing lowers friction on every future deal; being known as a shark costs more than it ever won."},
+6:{emp:"Quiet excellence gets quietly ignored. Present your work, volunteer for visible projects.",cow:"Be known for one specific thing — the go-to person for X gets remembered at decision time.",fam:"Show up at family events. Presence is remembered; absence is discussed.",com:"Put your name on your contributions; visible helpers get asked again, invisible ones get forgotten.",neg:"Make your offer memorable and distinct; attention to your option is half the sale."},
+7:{emp:"Flip it ethically: delegate and credit your team loudly — leaders are judged by what they orchestrate, and credit given returns multiplied.",cow:"Protect yourself from credit-thieves: send the summary email that timestamps your contribution.",fam:"Share household credit generously — 'we pulled this off' builds buy-in from spouse and kids.",com:"Organize rather than do everything; mobilizing ten volunteers beats doing ten jobs yourself.",neg:"Let the other side draft from your framework — they do the work inside your frame."},
+8:{emp:"Build skills and visibility so roles come to you; those who chase openings negotiate from weakness.",cow:"Help generously and colleagues start bringing opportunities to your desk.",fam:"Don't chase estranged relatives with pressure; create warm occasions that draw them back in.",com:"Host. The person whose table people gather around holds quiet, durable influence.",neg:"Create pull, not push — the party that initiates usually pays the premium. Make them come to you."},
+9:{emp:"Don't argue with the boss's flawed plan in the meeting; quietly deliver a working alternative.",cow:"Settle technical disputes with a demo, not a debate.",fam:"Don't lecture teenagers or relatives — model the behavior. Actions persuade where sermons entrench.",com:"Skeptical neighbors are won by one completed small project, not another pitch.",neg:"Show proof — references, pilots, numbers — instead of adjectives."},
+10:{emp:"Keep distance from chronic complainers; their reputation stains their whole circle.",cow:"Be sympathetic once, but don't join the daily grievance club.",fam:"You can't cut family like friends — love them, but limit exposure to chronic negativity and set boundaries so their crises don't become your identity.",com:"Avoid factions built on grievance; they consume members and then discard them.",neg:"Never catch the other side's panic or euphoria; emotional contagion mid-deal kills judgment."},
+11:{emp:"Be the person who understands the critical system or client — irreplaceability is job security (but don't hoard knowledge into hostage-taking).",cow:"Become a hub: the one who connects people, knows context, and unblocks things.",fam:"Flip it: raise children toward independence. Real family influence is being the trusted anchor people choose to consult.",com:"Run the thing nobody else wants to run; the organizer is never voted out.",neg:"Structure deals with ongoing value — service, support, relationship — rather than one-off transactions."},
+12:{emp:"Admitting a small mistake early buys credibility for the big moments. And notice flattery from above right before extra workload lands.",cow:"Beware the colleague who shares one 'secret' to extract ten of yours.",fam:"An unprompted honest apology disarms years of friction. Also notice relatives who give small gifts before big asks.",com:"Small sincere gestures open doors — and recognize when someone else's gesture is the setup.",neg:"Concede one minor point with visible honesty early; it makes your firm 'no' later believable."},
+13:{emp:"Frame every request around your boss's goals and metrics, never around your own need.",cow:"Ask for help in ways that make the helper look good.",fam:"Motivate kids and relatives through their interests, not your authority — 'here's what's in it for you' beats 'because I said so'.",com:"Recruit volunteers by what they gain — skills, standing, connection — not by guilt.",neg:"Sell the counterparty's upside. Nobody signs for your reasons."},
+14:{emp:"Listen in hallways and skip-levels; understand what leadership actually worries about before you pitch.",cow:"Assume casual chats travel. Ask more questions than you answer.",fam:"Listen closely at gatherings — knowing what each relative values and fears lets you keep peace and sidestep landmines.",com:"Learn the real interests behind each stakeholder's stated agenda.",neg:"Every casual pre-meeting chat is intelligence — theirs and yours. Learn their constraints before the table."},
+15:{emp:"Finish problems completely — half-resolved conflicts with a boss or HR resurface worse. If you escalate, bring the full case.",cow:"Don't wound rivals with snark; either make real peace or win decisively. Lingering feuds fester.",fam:"End recurring family disputes at the root — inheritance, boundaries — formally and completely. Half-settled issues poison decades.",com:"Settle disputes with written closure; ambiguity reopens every wound.",neg:"Close every open term. 'We'll figure that out later' clauses become next year's war."},
+16:{emp:"Don't be endlessly available on chat and weekends; measured availability signals value.",cow:"Skip the optional noise; presence at the meetings that matter then counts double.",fam:"Visit enough to be loved, not so much you're furniture — a little scarcity keeps your counsel valued. Don't over-advise.",com:"Rotate off the committee sometimes; let them feel the gap you fill.",neg:"Be visibly willing to leave the table — the credible walk-away is the strongest card in the deck."},
+17:{emp:"Mostly reversed at work: reliability is your power. But occasionally exceed the mold so you're never typecast or taken for granted.",cow:"Don't be so routine you're gameable; keep some moves unreadable in office politics.",fam:"Surprise in delights (gifts, plans), never in rules — children need predictability; relationships need occasional wonder.",com:"Keep some independence from every bloc so your support stays courted, not assumed.",neg:"Vary your patterns deal to deal; a predictable negotiator is a priced one."},
+18:{emp:"Don't bunker at your desk; hallway relationships surface opportunities — and warnings — first.",cow:"Eat lunch with people. Isolation reads as arrogance and leaves you last to know everything.",fam:"Stay in the family loop even when busy; the disconnected relative gets decided about, not consulted.",com:"Show up even when inconvenient; influence belongs to those in the room.",neg:"Maintain the network between deals; deals come from circulation."},
+19:{emp:"Study your boss's type — what they fear, reward, and never forgive — before pushing anything.",cow:"Map the office: who is vindictive, who is generous, whose memory is long.",fam:"Know each relative's sensitivities; one careless joke at the wrong in-law costs years.",com:"Learn the local history before proposing change; you don't yet know whose toes exist.",neg:"Research the person, not just the company — ego, pressures, and authority limits decide deals."},
+20:{emp:"Don't hitch entirely to one executive's star; patrons fall and take their protégés down.",cow:"Stay friendly with all factions; the side you formally join owns you.",fam:"Don't take sides in relatives' feuds — the neutral peacemaker holds lasting influence; partisans inherit enemies.",com:"Be the bridge between groups, not the property of one.",neg:"Keep real alternatives alive (a strong BATNA); the one with options sets the terms."},
+21:{emp:"Let others underestimate you early; lowered expectations make your results land twice as hard.",cow:"Asking 'naive' questions surfaces what others are hiding.",fam:"A little playful helplessness gets relatives invested in helping you — people love whom they've helped. And spot when it's used on you.",com:"The humble questioner learns the real story behind every agenda.",neg:"Let the other side feel cleverer; overconfident counterparties concede more."},
+22:{emp:"Lost the argument? Concede fast and gracefully — resentful losers get managed out; graceful ones get the next chance.",cow:"Apologize first in petty disputes; you bank goodwill and end it on your terms.",fam:"In marriage and family, win the relationship, not the argument. Strategic yielding today is influence tomorrow.",com:"Withdraw a doomed proposal early and resurface it better-timed.",neg:"Concede small points visibly to protect the terms that actually matter."},
+23:{emp:"Master one domain deeply before diversifying; the specialist gets the call.",cow:"Do fewer things visibly well rather than everything adequately.",fam:"Presence over presents: concentrated, undivided attention beats scattered multitasked hours with kids.",com:"Serve one cause deeply, not five thinly.",neg:"Run fewer negotiations with full preparation rather than many half-prepped."},
+24:{emp:"Learn the unwritten rules — how your org really communicates, credits, and escalates — and move gracefully within them.",cow:"Deliver criticism privately and indirectly, praise publicly; grace earns what talent alone doesn't.",fam:"Tact at gatherings — compliment the cooking, remember names, sidestep politics — is family diplomacy.",com:"Honor local rituals; respect for form earns you license for substance.",neg:"Mind etiquette: seniority, titles, who speaks first. Form opens the door for content."},
+25:{emp:"Rebrand deliberately at each job change; don't let the old junior image follow you.",cow:"You can shed a workplace reputation — change the behavior consistently and visibly.",fam:"Family may cast you forever as 'the kid'; calmly assert the adult you've become. Roles update only when you update them.",com:"Reinvent your contribution as the community's needs change.",neg:"Enter each negotiation as who you need to be — the identity you project sets your price."},
+26:{emp:"Keep records, and never be the unofficial doer of someone else's dirty work. Distance yourself from shady projects early.",cow:"Don't pass your messes to juniors; it always surfaces, with your name on it.",fam:"Don't triangulate — making one relative deliver your hard message to another dirties everyone. Speak directly.",com:"Stay far from money-handling ambiguity in associations; even rumors stick for years.",neg:"Use agents and lawyers for the hard messages so the principal relationship stays warm."},
+27:{emp:"Recognize charismatic-founder worship inside companies; evaluate leaders on substance. And give your own team something clear to believe in.",cow:"Enthusiasm recruits allies better than logic; give colleagues a story to join, not a task list.",fam:"Give the family shared rituals and story — traditions are healthy belief-glue. And inoculate kids against groups selling belonging.",com:"Movements run on belonging; build ritual into any group you lead — and watch for those exploiting the need.",neg:"Sell the story and the tribe, not just the product; buyers join things, not just buy them."},
+28:{emp:"Ask for the raise, the role, the stretch project. The timid are passed over — and the ask itself earns respect.",cow:"Volunteer first for the hard, visible thing.",fam:"Make the bold family moves — host the gathering, propose the trip, initiate the reconciliation. Initiative is leadership.",com:"Propose the ambitious version; communities rally to confidence.",neg:"Anchor high without apology; timid first offers negotiate against themselves."},
+29:{emp:"Accept roles for where they lead, not what they pay today; map the exit before you enter.",cow:"Before any office battle, war-game the aftermath: what actually happens after you 'win'?",fam:"Think endgame in family decisions — estate clarity, education paths, where today's small conflict lands in ten years.",com:"Plan the handover before launching the initiative; projects without successors die with their founders.",neg:"Script the whole arc — objections, concessions, closing sequence — before the first call."},
+30:{emp:"Deliver polished results without broadcasting the all-nighters; visible panic reads as incapacity. (But keep a quiet record of the effort.)",cow:"Make help look easy — a reluctant favor costs more goodwill than a clean refusal.",fam:"Hosting and parenting land best unhurried; your calm is contagious at home.",com:"Graceful organizing attracts volunteers; visible martyrdom repels them.",neg:"Never let them see you sweat the deadline you're dying under."},
+31:{emp:"Bring your boss two acceptable solutions, never an open problem — the framer of options steers the decision.",cow:"Offer colleagues choices you pre-selected; both doors lead somewhere you're fine with.",fam:"Parenting 101: 'red cup or blue cup?' Choice within your frame ends standoffs with toddlers — and with certain relatives.",com:"Shape the agenda; whoever writes the options wins the vote.",neg:"Offer tiered proposals (A/B/C) — they'll pick a door you built."},
+32:{emp:"Pitch projects as a compelling future state, not a problem list; leadership buys visions.",cow:"Frame every change by what colleagues will gain from it.",fam:"Motivate kids through imagination — and gently ground relatives chasing get-rich dreams before the sharks find them.",com:"Sell the picture of the better neighborhood, not the budget spreadsheet.",neg:"Buyers purchase the transformed after-state. Paint it — honestly."},
+33:{emp:"Learn what your boss fears — surprises? looking bad upward? — and systematically relieve it. Relieving pressure is influence.",cow:"Know your own buttons so office provocateurs can't play them.",fam:"Know each relative's insecurity so you never press it — and recognize who weaponizes guilt and approval on you; those are the classic family thumbscrews.",com:"Address stakeholders' real fears (property values, change, status) rather than their stated objections.",neg:"Find what they really need — the deadline, the quota, the career win. Price is rarely the true thumbscrew."},
+34:{emp:"Carry yourself at the level above; people get promoted into images they already fit. Stop self-deprecating your work.",cow:"Don't volunteer for perpetual grunt-work penance; how you value yourself is contagious.",fam:"State boundaries with relatives calmly and without apology — stated boundaries get honored; pleaded ones get steamrolled.",com:"Speak with standing and you will be given standing.",neg:"Respect your own price. Discounts begged become discounts expected."},
+35:{emp:"Ask for the raise after the win, not during the budget freeze. Career timing beats career effort.",cow:"Raise hard topics when the room is calm — never in the heat.",fam:"Timing is everything with family news: never at the funeral, never mid-fight, choose the walk over the dinner table.",com:"Propose change when the pain is fresh and the budget is open.",neg:"Deals close on their calendar pressure — learn their fiscal year, quota date, lease expiry."},
+36:{emp:"Passed over? Gracious indifference preserves standing; visible sulking marks you as wounded.",cow:"Ignore petty slights; reacting hands them power and an audience.",fam:"Let small jabs from relatives die unanswered — what you don't feed starves. And stop chasing approval that's withheld as a leash.",com:"Don't dignify every critic with a response; silence starves trolls.",neg:"The moment they sense you must have it, the price rises. Cultivate real detachment."},
+37:{emp:"Demo beats deck. One vivid prototype or chart outlives a hundred emails.",cow:"Celebrate team wins visibly; small ceremonies bond groups.",fam:"Create memorable family moments — the big-table dinner, the annual trip. Families run on imagery and ritual.",com:"Events and symbols — the mural, the festival — move communities more than memos ever will.",neg:"Site visits, demos, samples: let them see and touch. Spectacle persuades where specs don't."},
+38:{emp:"Package unconventional ideas in conventional wrapping; cultural fit buys you license to differ where it counts.",cow:"Don't sneer at office rituals. Join the birthday cake; change the strategy.",fam:"At gatherings, don't crusade your lifestyle or politics; blend graciously there, live as you choose at home.",com:"Respect local norms while quietly modeling the alternative.",neg:"Mirror their formality, pace and dress; style friction becomes substance friction."},
+39:{emp:"Never reply angry to the provoking email — the composed one in the escalation thread wins the audience.",cow:"Recognize deliberate provocateurs; your recorded overreaction is their trophy.",fam:"In family conflict, the calm one holds the power. Provoked outbursts get retold for years.",com:"Agitators thrive on your outrage; starve them with composure.",neg:"Some negotiators provoke to unbalance you — name it calmly and continue. Never counterpunch emotionally."},
+40:{emp:"'Great exposure' and vaguely promised promotions are unpriced IOUs — price everything; free always has a hook.",cow:"Favors from schemers come with invisible invoices; keep reciprocity ledgers clean.",fam:"Family money is never free — gifts with strings become control. Either give freely or structure it clearly.",com:"Beware the 'free' sponsorship that quietly buys your group's voice.",neg:"Suspicious discounts hide terms. Pay fair price for quality relationships; cheap deals cost twice."},
+41:{emp:"Following a legendary predecessor? Change the game — define a new scorecard rather than losing on theirs.",cow:"Don't inherit a role's old ways wholesale; mark your own tenure early.",fam:"Don't force kids to live your unlived dreams — let each child write their own name. And exit the 'successful sibling' comparison game entirely.",com:"Succeeding a beloved leader: honor them loudly, change things slowly, under your own banner.",neg:"Don't anchor to your predecessor's pricing or terms; reset the frame as a new chapter."},
+42:{emp:"Office toxicity usually traces to one person. Address — or route around — the source, not the symptoms.",cow:"Win over the informal ringleader and the clique follows.",fam:"Family conflicts usually have one stirrer; deal with the source directly and privately instead of battling every echo.",com:"Win the one respected elder and the neighborhood follows.",neg:"Find the real decision-maker and the real blocker. Convincing the room is worthless if the shepherd says no."},
+43:{emp:"Logic earns compliance; feeling earns effort. Make people feel the why and they'll own the what.",cow:"Remember birthdays, kids' names, current struggles — colleagues move mountains for those who truly see them.",fam:"Influence at home is 90% emotional deposits — presence, listening, remembered details — made long before any withdrawal (request).",com:"Door-to-door warmth beats flyers; people join people, not causes.",neg:"People buy from people they trust. Invest in the human before the terms."},
+44:{emp:"Reflect your manager's communication style — brief or detailed, slides or prose — and watch friction vanish.",cow:"Subtle mirroring builds rapport; mocking mirrors escalate. Choose deliberately.",fam:"Reflect feelings back before correcting — 'sounds like you felt ignored' — mirrored people feel heard and soften. Works on kids and in-laws alike.",com:"Echo the community's own language and values inside your proposals.",neg:"Mirror posture, pace and vocabulary, and label their position back to them — rapport is a negotiation science."},
+45:{emp:"New role? Change nothing for 30 days, then reform gradually, dressed as 'building on what works'.",cow:"Introduce process changes as small pilots, never revolutions.",fam:"Change family traditions gradually — replacing grandma's ritual overnight starts wars. Add before you subtract.",com:"Communities accept evolution and revolt at revolution; stage every change.",neg:"Renew contracts in familiar structure with improved terms; radical redlines spook signers."},
+46:{emp:"Share credit and admit small struggles; the flawless colleague gets resented — and left unhelped.",cow:"Ask for small favors and advice; minor vulnerability turns rivals into invested allies.",fam:"Let family see your struggles sometimes — the 'perfect' sibling or in-law earns envy, not warmth. Admitting mistakes to your kids teaches more than flawlessness.",com:"Lead with humility; communities resent polish and rally to the relatable.",neg:"A too-perfect pitch triggers suspicion. Acknowledge one real limitation and watch trust jump."},
+47:{emp:"Got the yes — raise, promotion, approval? Say thank you and stop selling; overtalking past 'yes' reopens the decision.",cow:"Won the dispute? Be gracious instantly; victory laps manufacture avengers.",fam:"After winning a family argument, drop it completely — rubbing it in converts a win into a feud.",com:"Pass your motion and stop; stacking demands onto one victory burns the coalition.",neg:"When they say yes: close, sign, leave. The extra squeeze kills goodwill — or the deal."},
+48:{emp:"Build a skills portfolio, not a job title; be able to re-form as your industry does.",cow:"Adapt your style to each audience without losing your core.",fam:"Parent each child differently — what worked on the first fails on the second. Stay fluid in methods, fixed in values.",com:"Serve the community's current needs, not the ones from the era you joined.",neg:"Bring no fixed script; adapt to what the table reveals while your walk-away point stays firm."}
+};
+
+const ROLES={
+inv:{icon:"📈",label:"Investor angle",get:l=>l.i},
+emp:{icon:"💼",label:"Employee angle",get:l=>ANGLES[l.n].emp},
+cow:{icon:"👥",label:"Coworker angle",get:l=>ANGLES[l.n].cow},
+fam:{icon:"🏠",label:"Family angle",get:l=>ANGLES[l.n].fam},
+com:{icon:"🌍",label:"Community angle",get:l=>ANGLES[l.n].com},
+neg:{icon:"🤝",label:"Negotiation angle",get:l=>ANGLES[l.n].neg}
+};
+let curRole='inv';
+
+/* ============ LIFE PLAYBOOKS (top lessons per role) ============ */
+const ROLEBOOK=[
+{icon:"💼",role:"The Employee — managing up and getting ahead",lessons:[
+ {h:"Make your boss's life easier, visibly",d:"Frame everything around their goals (Law 13), never outshine them publicly (1), and relieve what they fear most — surprises (33). Secure bosses promote; insecure ones bury."},
+ {h:"Be seen, with grace",d:"Quiet excellence is invisible excellence (6). Present your work, timestamp your contributions (7), but make it look effortless (30) and never flawless (46)."},
+ {h:"Time your asks",d:"Raise after the win, never during the freeze (35). Ask boldly — the timid are passed over (28) — then stop talking once you get the yes (47, 4)."},
+ {h:"Reputation is your résumé",d:"Reliable and no-drama outperforms brilliant and volatile (5). Never reply angry (39); never badmouth (5); never be the doer of someone else's dirty work (26)."},
+ {h:"Plan the career to the end",d:"Take roles for where they lead (29), rebrand at every move (25), hitch to no single patron (20), and keep your skills formless as the industry shifts (48)."}]},
+{icon:"👥",role:"The Coworker — peers and office politics",lessons:[
+ {h:"Be a hub, not an island",d:"Circulate (18), remember people's lives (43), help first (8) — the connected colleague hears warnings and opportunities first."},
+ {h:"Stay neutral in factions",d:"Friendly with all, owned by none (20). The side you formally join inherits enemies you didn't choose."},
+ {h:"Document quietly, share credit loudly",d:"Summary emails timestamp your work against credit-thieves (7, 26) while public generosity builds allies (46)."},
+ {h:"Win disputes like a diplomat",d:"Demo beats debate (9), apologize first in petty fights (22), be gracious instantly in victory (47) — avengers are manufactured by gloating."},
+ {h:"Know the terrain",d:"Map who is vindictive, who is generous, whose memory is long (19) — and spot the one person most office toxicity traces back to (42)."}]},
+{icon:"🏠",role:"The Family Man — spouse, kids, in-laws, relatives",lessons:[
+ {h:"Deposits before withdrawals",d:"Influence at home is presence, listening and remembered details (43, 23) accumulated long before you need to ask for anything. Mirror feelings before correcting (44)."},
+ {h:"Be the neutral anchor",d:"Take no sides in feuds (20), handle the one stirrer directly instead of the echoes (42), and let elders feel wise (1). The peacemaker quietly ends up with the real influence."},
+ {h:"Boundaries, stated royally",d:"Calm, unapologetic boundaries get honored; pleaded ones get steamrolled (34). Let petty jabs starve (36), keep your composure in every storm (39), and limit exposure to chronic negativity without cutting love (10)."},
+ {h:"Spot the family thumbscrews",d:"Guilt, approval-withholding, gifts with strings, triangulation — recognize the classic levers (33, 40, 12, 26) so they stop working on you. Never mix money and trust without structure (2)."},
+ {h:"Lead through ritual and timing",d:"Traditions are belief-glue — build them (27, 37), change them gradually (45), choose your moments for hard news (35), and give kids choices within your frame (31). Stay fluid per child, fixed in values (48)."}]},
+{icon:"🌍",role:"The Community Member — neighbors, groups, associations",lessons:[
+ {h:"Influence belongs to those in the room",d:"Show up (18), host (8), run the thing nobody wants to run (11). Consistent presence quietly outranks titles."},
+ {h:"Honor the forms, then change the substance",d:"Respect local rituals and elders (24, 1), blend before you reform (38, 45) — communities accept evolution and revolt at revolution."},
+ {h:"Win the shepherd",d:"One respected elder convinced is worth fifty flyers (42). Build support one-on-one before the public proposal (3), and recruit by what volunteers gain (13)."},
+ {h:"Spectacle moves crowds",d:"The festival, the mural, the completed small project (37, 9) persuade where memos never will."},
+ {h:"Reputation is the only currency",d:"Keep every commitment (5), stay clear of money ambiguity (26), lead with humility (46), and stop at the mark after each win (47)."}]},
+{icon:"🤝",role:"The Negotiator — business and sales",lessons:[
+ {h:"Never reveal need",d:"Conceal your reservation price and deadlines (3), cultivate real detachment (36), and keep a credible walk-away alive (16, 20). The hungrier party pays."},
+ {h:"Anchor bold, concede small",d:"Open high without apology (28, 34), concede minor points theatrically (22, 12), and control the menu of options they pick from (31)."},
+ {h:"Silence is a tool",d:"After naming your number, stop talking (4). The first to fill the silence concedes."},
+ {h:"Find the shepherd and the thumbscrew",d:"Locate the real decision-maker (42), research the person not just the company (19), and find what they actually need — quota, deadline, career win — because it's rarely price (33)."},
+ {h:"Close and leave",d:"Script the arc to the end (29), close every open term (15), and when they say yes — sign and go (47). The extra squeeze kills deals. And despise free lunches: suspicious discounts hide terms (40)."}]}
+];
+
+/* ============ THEMES ============ */
+const THEMES=[
+{h:"🏛️ Reputation is the real currency",d:"Power rests on what others believe about you. Build it deliberately, guard it ferociously, and never lend it cheaply — one breach undoes decades.",l:[5,34,46,25]},
+{h:"🧊 Emotional self-mastery beats raw talent",d:"Nearly every law assumes the winner is the calmest person in the room. Anger, envy, FOMO and pride are levers others pull; remove the levers.",l:[39,33,36,10]},
+{h:"⏳ Patience and timing are weapons",d:"Make others come to you, strike only when ripe, plan to the end, and know when to stop. Hurry is weakness made visible.",l:[8,35,29,47]},
+{h:"🎭 Perception is managed, not left to chance",d:"People judge by appearances, crave fantasy and follow spectacle. The world is run by those who understand this — and preys on those who don't.",l:[6,27,32,37,30]},
+{h:"🃏 Information asymmetry is the game",d:"Conceal your intentions, say less, probe others, control the options. Whoever knows more and reveals less sets the terms.",l:[3,4,14,31,21]},
+{h:"🌊 Adaptability outlasts strength",d:"Fixed forms, fixed identities and fixed loyalties are targets. Reinvent yourself, commit to no one, assume formlessness.",l:[48,25,20,45,41]},
+{h:"🛡️ The best use of the laws is defense",d:"Even if you never deploy a single tactic, the people across the table from you will. Recognizing the playbook is protection.",l:[12,26,40,19,18]}
+];
+
+/* ============ INVESTOR LESSONS ============ */
+const INVESTOR=[
+{h:"1. Guard the track record like a dynasty (Law 5)",d:"Reputation and integrity compound just like capital — and unlike capital, they can't be re-raised after a blow-up. Never risk what you have and need for what you don't have and don't need."},
+{h:"2. Let panics bring the market to you (Laws 8, 35)",d:"Hold patience and dry powder; desperate sellers eventually come to your price. The money is made in the waiting, collected in the acting."},
+{h:"3. Concentrate — then survive your concentration (Laws 23, 28, 29)",d:"Focus capital on your best-understood ideas and bet boldly when odds favor you, but plan to the end: define exits, run premortems, and size so no single mistake is fatal."},
+{h:"4. Capitulate fast when wrong (Laws 22, 15)",d:"Strategic surrender — cutting a broken thesis completely and early — is strength, not shame. Fighting the market for pride is how accounts die."},
+{h:"5. Know whose game you're playing (Laws 21, 31, 40)",d:"If a deal makes you feel brilliant, that feeling is the product. Whoever structures the options wins, and there is never a free lunch — find who's paying, or it's you."},
+{h:"6. Recognize the cult-stock playbook (Laws 27, 32, 37)",d:"Vague enormous promises, charismatic founders, spectacle over substance, hostility toward doubters: that's manufactured belief. Buy cash flows, not congregations."},
+{h:"7. Audit your information diet (Laws 10, 18)",d:"Emotions are contagious and echo chambers are fortresses. Curate calm, diverse, disconfirming inputs — especially during drawdowns."},
+{h:"8. Be contrarian in positions, conventional in conduct (Laws 38, 9, 4)",d:"Hold the variant view quietly. Public crusades and loud predictions create ego-lock-in; let the P&L make the argument."},
+{h:"9. Underwrite the shepherd (Laws 42, 19)",d:"Management quality is the thesis more often than the spreadsheet is. A great founder is an asset; a rotting CEO is a sell signal; and know exactly who sits across every table."},
+{h:"10. Stay formless across regimes (Laws 48, 25, 45, 41)",d:"Every strategy is eventually arbitraged or outdated. Adapt methods gradually, keep principles fixed, build your own process rather than cloning heroes — the flexible compound, the dogmatic get carried out."}
+];
+
+/* ============ ACTION STEPS ============ */
+const ACTIONS=[
+{b:"Write down your three 'thumbscrews'",s:"Name the emotional levers (FOMO, pride, loss-aversion…) most likely to be used against you — in markets and negotiations. (Law 33)"},
+{b:"Define exit rules before every new position or project",s:"Price/thesis triggers, time limits, and a premortem: 'This failed — why?' (Law 29)"},
+{b:"Create a reputation ledger",s:"List commitments made this quarter and whether you kept them. Reputation is built in entries, lost in erasures. (Law 5)"},
+{b:"Audit your information diet this week",s:"Unfollow chronic doom/euphoria sources; add two credible people who disagree with you. (Laws 10, 18)"},
+{b:"Practice saying less in the next three meetings",s:"Ask one more question, make one fewer prediction. Note what you learn. (Laws 4, 14)"},
+{b:"Identify where you're the sucker",s:"For each fee, 'free' service and hot deal in your life: who profits, and how? If unclear — it's you. (Laws 21, 40)"},
+{b:"Hold a 'kill your winner' review",s:"For your biggest winning position or project: what's the plan to stop, trim or consolidate the win? (Law 47)"},
+{b:"Run a cult-stock screen on your own holdings",s:"Which positions do you defend emotionally rather than numerically? Those get re-underwritten first. (Laws 27, 32)"},
+{b:"Map the shepherds",s:"For each major holding: who is the key person, what's the succession risk, what would make them a sell signal? (Law 42)"},
+{b:"Schedule a quarterly 'formlessness' review",s:"What regime assumption is baked into my strategy, and what would make it obsolete? (Law 48)"},
+{b:"Make one ally from a former rival",s:"Reconciled opponents have the most to prove — and the freshest perspective. (Law 2)"},
+{b:"Rehearse strategic surrender",s:"Pick the oldest losing position/commitment you keep 'for pride' and close it this month. (Law 22)"}
+];
+
+/* ============ helpers: safe storage ============ */
+const store={
+  mem:{},
+  get(k){try{return localStorage.getItem(k)??this.mem[k]??null}catch(e){return this.mem[k]??null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){} this.mem[k]=v}
+};
+
+/* ============ render laws ============ */
+const CAT_ICON={Strategy:"🎯",Perception:"🎭",Social:"🤝",Defense:"🛡️",Offense:"⚔️"};
+const grid=document.getElementById('grid'), tbody=document.getElementById('tbody');
+let readSet=new Set(JSON.parse(store.get('laws48_read')||'[]'));
+
+function cardHTML(l){
+  return `<div class="top"><span class="lnum">${l.n}</span><h3>${l.t}</h3></div>
+  <span class="cat sans">${CAT_ICON[l.c]} ${l.c}</span>
+  <p class="essence">${l.e}</p>
+  <div class="more sans">
+    <div class="row"><span class="lbl inv">${ROLES[curRole].icon} ${ROLES[curRole].label}</span>${ROLES[curRole].get(l)}</div>
+    <div class="row"><span class="lbl rev">⚠️ Caution / Reversal</span>${l.r}</div>
+    <button class="readbtn" data-read="${l.n}">${readSet.has(l.n)?'✓ Studied':'Mark as studied'}</button>
+  </div>
+  <div class="hint sans">${'click to '+(readSet.has(l.n)?'collapse':'expand')} ▾</div>`;
+}
+function render(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const cat=document.querySelector('.cat-pill.active').dataset.cat;
+  let shown=0;
+  grid.innerHTML=''; tbody.innerHTML='';
+  LAWS.forEach(l=>{
+    const hay=(l.n+' '+l.t+' '+l.e+' '+l.i+' '+l.r).toLowerCase();
+    if(cat!=='all'&&l.c!==cat)return;
+    if(q&&!hay.includes(q))return;
+    shown++;
+    const d=document.createElement('div');
+    d.className='card'+(readSet.has(l.n)?' read':'');
+    d.dataset.n=l.n;
+    d.innerHTML=cardHTML(l);
+    grid.appendChild(d);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="n">${l.n}</td><td><b>${l.t}</b><br><span style="color:var(--muted);font-size:.75rem">${CAT_ICON[l.c]} ${l.c}</span></td><td>${l.e}</td><td>${ROLES[curRole].get(l)}</td><td>${l.r}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('stat').textContent=`Showing ${shown} of 48 laws`;
+  document.getElementById('readCount').textContent=readSet.size;
+}
+grid.addEventListener('click',e=>{
+  const btn=e.target.closest('.readbtn');
+  if(btn){
+    const n=+btn.dataset.read;
+    readSet.has(n)?readSet.delete(n):readSet.add(n);
+    store.set('laws48_read',JSON.stringify([...readSet]));
+    render(); return;
+  }
+  const card=e.target.closest('.card');
+  if(card)card.classList.toggle('open');
+});
+document.getElementById('search').addEventListener('input',render);
+document.querySelectorAll('.cat-pill').forEach(p=>p.addEventListener('click',()=>{
+  document.querySelectorAll('.cat-pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active');render();
+}));
+document.querySelectorAll('.role-pill').forEach(p=>p.addEventListener('click',()=>{
+  document.querySelectorAll('.role-pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active');
+  curRole=p.dataset.role;
+  document.getElementById('angleTh').textContent=ROLES[curRole].icon+' '+ROLES[curRole].label;
+  render();
+}));
+document.getElementById('toggleView').addEventListener('click',function(){
+  const t=document.getElementById('tablewrap'), g=grid;
+  const table=t.style.display!=='block';
+  t.style.display=table?'block':'none';
+  g.style.display=table?'none':'grid';
+  this.textContent=table?'🃏 Card view':'📋 Table view';
+});
+
+/* roulette */
+document.getElementById('spin').addEventListener('click',()=>{
+  const l=LAWS[Math.floor(Math.random()*48)];
+  const out=document.getElementById('rouletteOut');
+  out.innerHTML='';
+  const d=document.createElement('div');
+  d.className='card open'+(readSet.has(l.n)?' read':'');
+  d.innerHTML=cardHTML(l);
+  out.appendChild(d);
+});
+
+/* ============ themes / investor / actions ============ */
+document.getElementById('themes').innerHTML=THEMES.map(t=>
+ `<div class="theme"><h3>${t.h}</h3><p>${t.d}</p><p class="laws sans">Related laws: ${t.l.map(n=>'#'+n).join(', ')}</p></div>`).join('');
+document.getElementById('investor').innerHTML=INVESTOR.map(t=>
+ `<div class="inv-card"><h3>${t.h}</h3><p>${t.d}</p></div>`).join('');
+
+document.getElementById('rolebooks').innerHTML=ROLEBOOK.map(rb=>
+ `<h3 style="color:var(--gold);margin:22px 0 10px;font-size:1.15rem">${rb.icon} ${rb.role}</h3>`+
+ rb.lessons.map(t=>`<div class="inv-card" style="border-left-color:var(--blue)"><h3 style="color:var(--blue)">${t.h}</h3><p>${t.d}</p></div>`).join('')
+).join('');
+
+let doneSet=new Set(JSON.parse(store.get('laws48_actions')||'[]'));
+const actBox=document.getElementById('actions');
+function renderActions(){
+  actBox.innerHTML=ACTIONS.map((a,i)=>
+   `<label class="action sans ${doneSet.has(i)?'done':''}"><input type="checkbox" data-i="${i}" ${doneSet.has(i)?'checked':''}><div class="txt"><b>${a.b}</b><span>${a.s}</span></div></label>`).join('');
+  document.querySelector('#actionProgress div').style.width=(doneSet.size/ACTIONS.length*100)+'%';
+}
+actBox.addEventListener('change',e=>{
+  const i=+e.target.dataset.i;
+  e.target.checked?doneSet.add(i):doneSet.delete(i);
+  store.set('laws48_actions',JSON.stringify([...doneSet]));
+  renderActions();
+});
+renderActions();
+
+/* ============ tabs ============ */
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('section.view').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('view-'+b.dataset.view).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}));
+
+/* ============ views counter (free Abacus API — works on static GitHub Pages) ============ */
+(function(){
+  const el=document.getElementById('views');
+  // Namespace/key: change 'faeez-48laws-summary' if you fork this page.
+  fetch('https://abacus.jasoncameron.dev/hit/faeez-48laws-summary/pageviews')
+    .then(r=>r.json())
+    .then(d=>{el.textContent=(d.value??0).toLocaleString()})
+    .catch(()=>{ // offline / blocked: fall back to a local-only count
+      let v=(+store.get('laws48_views')||0)+1;
+      store.set('laws48_views',v);
+      el.textContent=v+' (local)';
+    });
+})();
+
+render();
+</script>
+</body>
+</html>
